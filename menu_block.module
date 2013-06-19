@@ -142,6 +142,7 @@ function template_preprocess_menu_block_wrapper(&$variables) {
   $variables['classes_array'][] = 'menu-name-' . $variables['config']['menu_name'];
   $variables['classes_array'][] = 'parent-mlid-' . $variables['config']['parent_mlid'];
   $variables['classes_array'][] = 'menu-level-' . $variables['config']['level'];
+  $variables['classes_array'][] = 'menu-style-' . $variables['config']['style'];
 }
 
 /**
@@ -184,6 +185,7 @@ function menu_block_get_config($delta = NULL) {
   $config = array(
     'delta'       => $delta,
     'menu_name'   => 'main-menu',
+    'style'       => '',
     'parent_mlid' => 0,
     'title_link'  => 0,
     'admin_title' => '',
@@ -211,6 +213,7 @@ function menu_block_get_config($delta = NULL) {
 
     $config['title_link']  = variable_get("menu_block_{$delta}_title_link",  $config['title_link']);
     $config['admin_title'] = variable_get("menu_block_{$delta}_admin_title", $config['admin_title']);
+    $config['style']       = variable_get("menu_block_{$delta}_style",       $config['style']);
     $config['level']       = variable_get("menu_block_{$delta}_level",       $config['level']);
     $config['follow']      = variable_get("menu_block_{$delta}_follow",      $config['follow']);
     $config['depth']       = variable_get("menu_block_{$delta}_depth",       $config['depth']);
@@ -363,6 +366,7 @@ function menu_tree_build($config) {
     $data['content']['#theme'] = array(
       'menu_block_wrapper__' . str_replace('-', '_', $config['delta']),
       'menu_block_wrapper__' . str_replace('-', '_', $config['menu_name']),
+      'menu_block_wrapper__' . str_replace('-', '_', $config['style']),
       'menu_block_wrapper'
     );
     $data['content']['#config'] = $config;
@@ -639,6 +643,7 @@ function menu_block_tree_output(&$tree, $config = array()) {
   }
   $hook_delta = str_replace('-', '_', $config['delta']);
   $hook_menu_name = str_replace('-', '_', $config['menu_name']);
+  $hook_style = str_replace('-', '_', $config['style']);
 
   // Pull out just the menu items we are going to render so that we
   // get an accurate count for the first/last classes.
@@ -685,6 +690,7 @@ function menu_block_tree_output(&$tree, $config = array()) {
     $element['#theme'] = array(
       'menu_link__menu_block__' . $hook_delta,
       'menu_link__menu_block__' . $hook_menu_name,
+      'menu_link__menu_block__' . $hook_style,
       'menu_link__menu_block',
       'menu_link__' . $hook_menu_name,
       'menu_link',
@@ -707,6 +713,7 @@ function menu_block_tree_output(&$tree, $config = array()) {
     $build['#theme_wrappers'][] = array(
       'menu_tree__menu_block__' . $hook_delta,
       'menu_tree__menu_block__' . $hook_menu_name,
+      'menu_tree__menu_block__' . $hook_style,
       'menu_tree__menu_block',
       'menu_tree__' . $hook_menu_name,
       'menu_tree',
