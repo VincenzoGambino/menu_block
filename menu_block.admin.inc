@@ -166,6 +166,7 @@ function menu_block_delete_submit($form, &$form_state) {
   variable_del("menu_block_{$delta}_depth");
   variable_del("menu_block_{$delta}_expanded");
   variable_del("menu_block_{$delta}_sort");
+  variable_del("menu_block_{$delta}_style");
 
   db_delete('block')
     ->condition('module', 'menu_block')
@@ -223,31 +224,32 @@ function _menu_block_format_title($config) {
       '@menu_name' => $menus[$config['menu_name']],
       '@level1' => $config['level'],
       '@level2' => $config['level'] + $config['depth'] - 1,
+      '@style' => $config['style'],
     );
     if ($config['parent_mlid']) {
       $parent_item = menu_link_load($config['parent_mlid']);
       $replacements['@menu_name'] = $parent_item['title'];
     }
     if ($config['follow']) {
-      $title = t('@menu_name (active menu item)', $replacements);
+      $title = t('@menu_name (active menu item) - @style', $replacements);
     }
     elseif ($config['depth'] == 1) {
-      $title = t('@menu_name (level @level1)', $replacements);
+      $title = t('@menu_name (level @level1) - @style', $replacements);
     }
     elseif ($config['depth']) {
       if ($config['expanded']) {
-        $title = t('@menu_name (expanded levels @level1-@level2)', $replacements);
+        $title = t('@menu_name (expanded levels @level1-@level2) - @style', $replacements);
       }
       else {
-        $title = t('@menu_name (levels @level1-@level2)', $replacements);
+        $title = t('@menu_name (levels @level1-@level2) - @style', $replacements);
       }
     }
     else {
       if ($config['expanded']) {
-        $title = t('@menu_name (expanded levels @level1+)', $replacements);
+        $title = t('@menu_name (expanded levels @level1+) - @style', $replacements);
       }
       else {
-        $title = t('@menu_name (levels @level1+)', $replacements);
+        $title = t('@menu_name (levels @level1+) - @style', $replacements);
       }
     }
   }
@@ -346,6 +348,13 @@ function menu_block_configure_form($form, &$form_state) {
     '#description' => t('The preferred menus used by <em>&lt;the menu selected by the page&gt;</em> can be customized on the <a href="!url">Menu block settings page</a>.', array('!url' => url('admin/config/user-interface/menu-block'))),
     '#attributes' => array('class' => array('menu-block-menu-name')),
   );
+  $form['style'] = array (
+    '#type' => 'textfield',
+    '#title' => 'Style',
+    '#default_value' => $config['style'],
+    '#description' => t('By default you can use theme_menu_tree__menu_block__REGION(), theme_menu_link__menu_block__REGION() and menu_block_wrapper__REGION.tpl.php.<br />
+    Here you can create your own style name, then you can change "REGION" to your style name.'),    
+  );
   $form['level'] = array(
     '#type' => 'select',
     '#title' => t('Starting level'),
@@ -393,7 +402,7 @@ function menu_block_configure_form($form, &$form_state) {
         ':input[name=follow]' => array('checked' => TRUE),
       ),
     ),
-  );
+  );  
   $form['depth'] = array(
     '#type' => 'select',
     '#title' => t('Maximum depth'),
@@ -486,6 +495,8 @@ function _menu_block_block_save($delta = '', $edit = array()) {
     if (empty($config['exported_to_code'])) {
       variable_set("menu_block_{$delta}_title_link", $edit['title_link']);
       variable_set("menu_block_{$delta}_admin_title", $edit['admin_title']);
+      variable_set("menu_block_{$delta}_style", $edit['style']);
+      variable_set("menu_block_{$delta}_parent", $edit['parent']);
       variable_set("menu_block_{$delta}_parent", $edit['parent']);
       variable_set("menu_block_{$delta}_level", $edit['level']);
       variable_set("menu_block_{$delta}_follow", $edit['follow']);
