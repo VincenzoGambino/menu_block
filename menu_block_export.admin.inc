@@ -73,6 +73,7 @@ function menu_block_export_form_submit(&$form, &$form_state) {
       'parent_mlid' => {$config['parent_mlid']},
       'title_link'  => {$config['title_link']},
       'admin_title' => '{$config['admin_title']}',
+      'style'       => '{$config['style']}',
       'level'       => {$config['level']},
       'follow'      => {$config['follow']},
       'depth'       => {$config['depth']},
