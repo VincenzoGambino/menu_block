@@ -231,25 +231,25 @@ function _menu_block_format_title($config) {
       $replacements['@menu_name'] = $parent_item['title'];
     }
     if ($config['follow']) {
-      $title = t('@menu_name (active menu item) - @style', $replacements);
+      $title = t('@menu_name - @style (active menu item)', $replacements);
     }
     elseif ($config['depth'] == 1) {
-      $title = t('@menu_name (level @level1) - @style', $replacements);
+      $title = t('@menu_name - @style (level @level1)', $replacements);
     }
     elseif ($config['depth']) {
       if ($config['expanded']) {
-        $title = t('@menu_name (expanded levels @level1-@level2) - @style', $replacements);
+        $title = t('@menu_name - @style (expanded levels @level1-@level2)', $replacements);
       }
       else {
-        $title = t('@menu_name (levels @level1-@level2) - @style', $replacements);
+        $title = t('@menu_name - @style (levels @level1-@level2)', $replacements);
       }
     }
     else {
       if ($config['expanded']) {
-        $title = t('@menu_name (expanded levels @level1+) - @style', $replacements);
+        $title = t('@menu_name - @style (expanded levels @level1+)', $replacements);
       }
       else {
-        $title = t('@menu_name (levels @level1+) - @style', $replacements);
+        $title = t('@menu_name  - @style (levels @level1+)', $replacements);
       }
     }
   }
@@ -491,11 +491,18 @@ function menu_block_configure_form_follow_validate($element, &$form_state) {
 function _menu_block_block_save($delta = '', $edit = array()) {
   if (!empty($delta)) {
     // Don't save values for an exported block.
+    $region_style = block_load('menu_block', $delta);
+    dsm($region_style);
     $config = menu_block_get_config($delta);
     if (empty($config['exported_to_code'])) {
       variable_set("menu_block_{$delta}_title_link", $edit['title_link']);
       variable_set("menu_block_{$delta}_admin_title", $edit['admin_title']);
-      variable_set("menu_block_{$delta}_style", $edit['style']);
+      if (empty($edit['style'])){
+        variable_set("menu_block_{$delta}_style", $region_style->region);
+      }
+      else {
+        variable_set("menu_block_{$delta}_style", $edit['style']);
+      }
       variable_set("menu_block_{$delta}_parent", $edit['parent']);
       variable_set("menu_block_{$delta}_parent", $edit['parent']);
       variable_set("menu_block_{$delta}_level", $edit['level']);
