@@ -113,11 +113,14 @@ function menu_block_add_block_form_submit($form, &$form_state) {
   $form_state['redirect'] = 'admin/structure/block';
 }
 
+
 /**
  * Alters the block admin form to add delete links next to menu blocks.
  */
 function _menu_block_form_block_admin_display_form_alter(&$form, $form_state) {
   $blocks = module_invoke_all('menu_block_blocks');
+  #dsm($form);
+  $form['#submit'] = array('menu_block_admin_display_form_submit');
   foreach (variable_get('menu_block_ids', array()) AS $delta) {
     if (empty($blocks[$delta])) {
       $form['blocks']['menu_block_' . $delta]['delete'] = array('#type' => 'link', '#title' => t('delete'), '#href' => 'admin/structure/block/delete-menu-block/' . $delta);
@@ -135,8 +138,49 @@ function _menu_block_form_block_admin_display_form_alter(&$form, $form_state) {
       }
     }
   }
+  
 }
 
+
+
+
+function menu_block_admin_display_form($form, &$form_state) {
+  #$blocks = module_invoke_all('menu_block_blocks');
+  module_load_include('inc', 'block', 'block.admin');
+  $form = block_admin_display_form($form, $form_state);
+  $form_state['build_info']['base_form_id'] = 'block_admin_display_form';
+  drupal_set_message($form);
+  $form['#submit'] = array('menu_block_admin_display_form_submit');
+  
+}
+
+function menu_block_admin_display_form_submit($form, &$form_state) {
+   $transaction = db_transaction();
+  try {
+    foreach ($form_state['values']['blocks'] as $block) {
+      $block['status'] = (int) ($block['region'] != BLOCK_REGION_NONE);
+      $block['region'] = $block['status'] ? $block['region'] : '';
+      if ($block['module'] == 'menu_block') {
+        if ($block['region'] != variable_get("menu_block_{$block['delta']}_style")) {
+          variable_set("menu_block_{$block['delta']}_style", $block['region']);
+        }
+      }
+      db_update('block')->fields(array(
+        'status' => $block['status'],
+        'weight' => $block['weight'],
+        'region' => $block['region'],
+      ))->condition('module', $block['module'])->condition('delta', $block['delta'])->condition('theme', $block['theme'])->execute();
+    }
+  }
+  catch (Exception $e) {
+    $transaction->rollback();
+    watchdog_exception('block', $e);
+    throw $e;
+  }
+  dsm($form_state);
+  drupal_set_message(t('The block settings have been updated.'));
+  cache_clear_all();
+}
 /**
  * Menu callback: confirm deletion of menu blocks.
  */
