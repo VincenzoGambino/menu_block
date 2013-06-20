@@ -132,7 +132,6 @@ function menu_block_block_view($delta = '') {
   return $data;
 }
 
-
 /**
  * Process variables for menu-block-wrapper.tpl.php.
  *

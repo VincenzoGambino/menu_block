@@ -113,13 +113,11 @@ function menu_block_add_block_form_submit($form, &$form_state) {
   $form_state['redirect'] = 'admin/structure/block';
 }
 
-
 /**
  * Alters the block admin form to add delete links next to menu blocks.
  */
 function _menu_block_form_block_admin_display_form_alter(&$form, $form_state) {
   $blocks = module_invoke_all('menu_block_blocks');
-  #dsm($form);
   $form['#submit'] = array('menu_block_admin_display_form_submit');
   foreach (variable_get('menu_block_ids', array()) AS $delta) {
     if (empty($blocks[$delta])) {
@@ -138,20 +136,6 @@ function _menu_block_form_block_admin_display_form_alter(&$form, $form_state) {
       }
     }
   }
-  
-}
-
-
-
-
-function menu_block_admin_display_form($form, &$form_state) {
-  #$blocks = module_invoke_all('menu_block_blocks');
-  module_load_include('inc', 'block', 'block.admin');
-  $form = block_admin_display_form($form, $form_state);
-  $form_state['build_info']['base_form_id'] = 'block_admin_display_form';
-  drupal_set_message($form);
-  $form['#submit'] = array('menu_block_admin_display_form_submit');
-  
 }
 
 function menu_block_admin_display_form_submit($form, &$form_state) {
@@ -177,7 +161,6 @@ function menu_block_admin_display_form_submit($form, &$form_state) {
     watchdog_exception('block', $e);
     throw $e;
   }
-  dsm($form_state);
   drupal_set_message(t('The block settings have been updated.'));
   cache_clear_all();
 }
@@ -536,7 +519,6 @@ function _menu_block_block_save($delta = '', $edit = array()) {
   if (!empty($delta)) {
     // Don't save values for an exported block.
     $region_style = block_load('menu_block', $delta);
-    dsm($region_style);
     $config = menu_block_get_config($delta);
     if (empty($config['exported_to_code'])) {
       variable_set("menu_block_{$delta}_title_link", $edit['title_link']);
